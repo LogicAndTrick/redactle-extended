@@ -80,7 +80,7 @@ export const commonWords = [
     'within',
     'without',
 
-    // Extended redactle
+    // Redactle Extended
     'all',
     'any',
     'are',

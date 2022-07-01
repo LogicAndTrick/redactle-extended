@@ -72,7 +72,7 @@ function jump(id : number) {
         <div class="modal-dialog modal-xl">
             <div class="modal-content bg-dark text-light border">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="infoModalLabel">Welcome to Extended Redactle!</h5>
+                    <h5 class="modal-title" id="infoModalLabel">Welcome to Redactle Extended!</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -83,7 +83,8 @@ function jump(id : number) {
                     </p>
                     <p>
                         Redactle was originally created by <a href="https://www.twitter.com/jhntrnr" target="_blank">John Turner</a>.
-                        Extended Redactle was created by <a href="https://logic-and-trick.com" target="_blank">Logic &amp; Trick</a>.
+                        Redactle Extended was created by <a href="https://logic-and-trick.com" target="_blank">Logic &amp; Trick</a>.
+                        Source code available on <a href="https://github.com/LogicAndTrick/redactle-extended" target="_blank">GitHub</a>.
                     </p>
                     <h5>How to Play</h5>
                     <ul>
@@ -105,9 +106,9 @@ function jump(id : number) {
                             English prepositions and articles. Guessing these words does not count toward your score.
                         </li>
                     </ul>
-                    <h5>Does Extended Redactle collect any user data?</h5>
+                    <h5>Does Redactle Extended collect any user data?</h5>
                     <p>
-                        No. Extended Redactle does not collect any user information at all, it is all stored in the browser and is never
+                        No. Redactle Extended does not collect any user information at all, it is all stored in the browser and is never
                         transmitted to the server or anywhere else. We don't use any analytics or tracking platforms.
                     </p>
                     <p>
