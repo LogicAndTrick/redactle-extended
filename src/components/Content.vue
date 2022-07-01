@@ -37,7 +37,7 @@ function share() {
 <template>
     <div class="article-container overflow-auto">
         <section v-if="gameState.solved">
-                <h3>Congratulations, you solved Redactle #{{gameState.id}}!</h3>
+                <h3>Congratulations, you solved Redactle Extended #{{gameState.id}}!</h3>
                 <ul>
                     <li>The answer was: {{gameState.article?.title}}</li>
                     <li>You solved it in {{gameState.guesses.length}} guesses</li>

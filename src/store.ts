@@ -140,7 +140,7 @@ function load() : boolean {
 }
 
 export async function guess(word: string) {
-    word = word.replace(/\s/g,'').normalize('NFD');
+    word = word.replace(/\s/g,'').toLowerCase().trim().normalize('NFD');
 
     if (commonWords.includes(word)) {
         highlight({
