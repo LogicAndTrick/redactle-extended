@@ -3,7 +3,7 @@
 import { onMounted } from 'vue';
 
 import { getArticle } from './net';
-import { gameState, loadGame } from './store';
+import { gameState, loadTodaysGame } from './store';
 
 import Navbar from './components/Navbar.vue';
 import GuessList from './components/GuessList.vue';
@@ -11,7 +11,9 @@ import GuessBox from './components/GuessBox.vue';
 import Content from './components/Content.vue';
 
 onMounted(() => {
-    loadGame('standard');
+    let version = localStorage.getItem('selected-version');
+    if (version == 'standard' || version == 'gaming') loadTodaysGame(version);
+    loadTodaysGame('standard');
 });
 
 </script>

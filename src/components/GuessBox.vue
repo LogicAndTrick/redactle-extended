@@ -6,11 +6,11 @@ import { guess, gameState } from '../store';
 const input = ref('');
 
 function top() {
-    document.body.scrollTo({ top: 0, behavior: 'smooth' });
+    gameState.element.parentElement?.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function submit() {
-    if (!input.value) return;
+    if (!input.value || gameState.solved) return;
     guess(input.value);
     input.value = '';
 }
@@ -21,8 +21,8 @@ function submit() {
     <form class="guess-box bg-dark" v-on:submit.prevent="submit">
         <div class="input-group">
             <button class="btn btn-outline-secondary" type="button" @click.prevent="top">&#9650; Top</button>
-            <input v-model="input" type="text" class="form-control" aria-label="Text input" autofocus autocomplete="off" placeholder="Guess">
-            <button class="btn btn-outline-secondary" type="submit">Guess</button>
+            <input v-model="input" type="text" class="form-control" aria-label="Text input" autofocus autocomplete="off" placeholder="Guess" :disabled="gameState.solved">
+            <button class="btn btn-outline-secondary" type="submit" :disabled="gameState.solved">Guess</button>
         </div>
     </form>
 </template>

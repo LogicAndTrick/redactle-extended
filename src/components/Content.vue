@@ -2,87 +2,52 @@
 
 import { ref, computed, watch, onMounted, onUpdated, onUnmounted } from 'vue';
 import { commonWords } from '../common-words';
-import { mediator } from '../mediator';
 
-import { gameState, loadGame, save, load, win, Guess } from '../store';
+import { gameState, loadGame } from '../store';
 
-let gameElement : HTMLDivElement = document.createElement('div');
 const element = ref<HTMLElement>();
 
 onMounted(() => {
-    reset();
-    mediator.on('loaded', reset);
-    mediator.on('reveal', reveal);
+    element.value?.replaceChildren(gameState.element);
 });
-
-onUnmounted(() => {
-    mediator.off('loaded', reset);
-    mediator.off('reveal', reveal);
-});
-
-function reset() {
-    if (gameState.loading || !gameState.article || !gameState.article.html) return;
-    const el = document.createElement('div');
-    el.classList.add('content');
-    el.innerHTML = gameState.article.html;
-    
-    // Censoring
-    el.querySelectorAll('.word').forEach(x => {
-        if (!x.textContent) return;
-        const text = x.textContent.trim().toLowerCase();
-        if (commonWords.includes(text)) return;
-        (<any> x).originalContent = x.textContent;
-        x.textContent = '\u2588'.repeat(text.length);
-        x.classList.add('censored');
-        (<any> x).word = text;
-    });
-
-    gameElement = el;
-    element.value?.replaceChildren(gameElement);
-    load();
-    reveal(gameState.guesses);
-}
-
-function reveal(event : any) {
-    console.log('reveal', event);
-    const words : string[] = event.flatMap((x : Guess) => x.words).map((x : string) => x.toLowerCase());
-    gameElement.querySelectorAll('.word').forEach(x => {
-        const w = (<any> x).word;
-        if (w && words.includes(w)) {
-            x.textContent = (<any> x).originalContent ?? x.textContent;
-            x.classList.remove('censored');
-        }
-    });
-    gameElement = gameElement;
-    checkForWin();
-}
-
-function checkForWin() {
-    const heading = gameElement.querySelector('h1')!;
-    const solved = heading.querySelectorAll('.censored').length == 0;
-    if (solved) {
-        gameElement.querySelectorAll('.censored').forEach(x => {
-            x.textContent = (<any> x).originalContent ?? x.textContent;
-            x.classList.remove('censored');
-        });
-        win();
-    }
-}
 
 onUpdated(() => {
 });
 
 
+const accuracy = computed(() => {
+    const total = gameState.guesses.length;
+    if (total <= 0) return 'N/A';
+    const hit = gameState.guesses.filter(x => x.hits > 0).length;
+    return Math.round((hit / total) * 10000) / 100 + '%';
+});
+
+function share() {
+    // todo 
+}
 
 </script>
 
 <template>
-    <article class="overflow-auto" ref="element">
-    </article>
+    <div class="article-container overflow-auto">
+        <section v-if="gameState.solved">
+                <h3>Congratulations, you solved Redactle #${redactleIndex+1}!</h3>
+                <ul>
+                    <li>The answer was: {{gameState.article?.title}}</li>
+                    <li>You solved it in {{gameState.guesses.length}} guesses</li>
+                    <li>Your accuracy was {{accuracy}}</li>
+                </ul>
+                <p>
+                    <a href="#" v-on:click.prevent="share">Share your results</a>
+                </p>
+        </section>
+        <article ref="element">
+        </article>
+    </div>
 </template>
 
 <style lang="scss">
-article {
+.article-container {
     position: fixed;
     top: 56px;
     left: 0;
@@ -91,7 +56,7 @@ article {
     padding: 1rem;
 
     @media (max-width: 991.98px) {
-        bottom: calc(25vw + 56px);
+        bottom: calc(25vh + 56px);
         right: 0;
     }
 

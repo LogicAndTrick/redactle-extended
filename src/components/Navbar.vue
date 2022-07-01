@@ -3,6 +3,8 @@
 import { Modal } from 'bootstrap';
 import { ref, onMounted } from 'vue';
 
+import { loadTodaysGame, gameState } from '../store';
+
 const infoModal = ref<HTMLDivElement>();
 let im: Modal | null = null;
 
@@ -26,6 +28,15 @@ function openInfoModal() {
             <ul class="navbar-nav">
                 <li class="nav-item">
                     <a class="nav-link mx-2" href="#" id="infoBtn" @click.prevent="openInfoModal">Info</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Edition: {{gameState.version}}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="#" @click.prevent="loadTodaysGame('standard')">Standard</a></li>
+                        <li><a class="dropdown-item" href="#" @click.prevent="loadTodaysGame('gaming')">Gaming</a></li>
+                    </ul>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link mx-2" href="https://www.redactle.com/" target="_blank">Original Redactle</a>
