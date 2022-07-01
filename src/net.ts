@@ -170,7 +170,7 @@ async function getArticleFollowRedirects(name: string, redirectCount: number) : 
         .forEach(x => {
             if (!x.textContent) return;
             const replaceNode = document.createElement('div');
-            replaceNode.innerHTML = x.textContent.replace(/\b([a-z0-9']+)\b/ig, '<span class="word">$1</span>');
+            replaceNode.innerHTML = x.textContent.replace(/\b([A-Za-zÀ-ÖØ-öø-ÿ0-9']+)\b/ig, '<span class="word">$1</span>');
             x.replaceWith(...Array.from(replaceNode.childNodes));
         });
 

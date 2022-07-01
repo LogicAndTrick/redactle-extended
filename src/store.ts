@@ -94,7 +94,7 @@ async function loadGame(version : GameVersion, game : ListItem) {
 
         const text = x.textContent.trim().toLowerCase();
         (<any> x).originalContent = x.textContent;
-        (<any> x).word = text.replace("'", '').normalize('NFD');
+        (<any> x).word = text.replace("'", '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, "");
 
         if (commonWords.includes(text)) return;
         x.textContent = '\u2588'.repeat(text.length);
@@ -140,7 +140,7 @@ function load() : boolean {
 }
 
 export async function guess(word: string) {
-    word = word.replace(/\s/g,'').toLowerCase().trim().normalize('NFD');
+    word = word.replace(/\s/g,'').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, "");
 
     if (commonWords.includes(word)) {
         highlight({
