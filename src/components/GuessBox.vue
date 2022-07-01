@@ -1,16 +1,20 @@
 <script setup lang="ts">
 
 import { ref, onMounted } from 'vue';
-import { guess, gameState } from '../store';
+import { guess, gameState, highlight } from '../store';
 
 const input = ref('');
 
 function top() {
-    gameState.element.parentElement?.scrollTo({ top: 0, behavior: 'smooth' });
+    gameState.element.closest('.overflow-auto')?.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function submit() {
-    if (!input.value || gameState.solved) return;
+    if (!input.value) {
+        if (gameState.highlighted) highlight(gameState.highlighted);
+        return;
+    }
+    if (gameState.solved) return;
     guess(input.value);
     input.value = '';
 }

@@ -130,7 +130,7 @@ async function getArticleFollowRedirects(name: string, redirectCount: number) : 
 
     // Add article title
     const titleHolder = document.createElement('h1');
-    const titleTxt = name.replace('_', ' ');
+    const titleTxt = receivedJson.parse.title.replace('_', ' ');
     titleHolder.innerText = titleTxt;
     e.prepend(titleHolder);
 

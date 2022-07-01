@@ -5,6 +5,10 @@ import { Article, getArticle } from './net';
 
 export type GameVersion = 'standard' | 'gaming';
 
+function isValidVersion(name : string | null | undefined) : name is GameVersion {
+    return name == 'standard' || name == 'gaming';
+}
+
 export type Guess = {
     word: string,
     words: string[],
@@ -22,22 +26,61 @@ export const gameState = reactive({
     highlighted: <Guess | undefined> undefined
 });
 
-export async function loadTodaysGame(version : GameVersion) {
-    await loadGame(version, 0);
+type ListItem = {
+    date: string,
+    index: number,
+    name: string
+};
+
+export function loadDefaultGame() {
+    const hashMatch = window.location.hash.match(/^#\/([a-z]+)\/(\d+)/i);
+    if (hashMatch) {
+        const version = hashMatch[1];
+        const id = parseInt(hashMatch[2], 10);
+        if (isValidVersion(version)) return loadGameById(version, id);
+    }
+
+    const version = localStorage.getItem('selected-version');
+    if (isValidVersion(version)) return loadTodaysGame(version);
+    else return loadTodaysGame('standard');
 }
 
-export async function loadGame(version : GameVersion, id : number) {
+export async function loadTodaysGame(version : GameVersion) {
+    const today = new Date();
+    await loadDateGame(version, today);
+}
+
+export async function loadGameById(version : GameVersion, id : number) {
+    const date = new Date(Date.parse('2022-06-25T00:00:00Z'));
+    const now = new Date();
+    date.setUTCDate(date.getUTCDate() + id);
+    if (date > now) await loadDateGame(version, now);
+    else await loadDateGame(version, date);
+}
+
+async function loadDateGame(version : GameVersion, date : Date) {
+    const ym = date.getUTCFullYear() + (date.getUTCMonth() + 1).toString().padStart(2, '0');
+    const ymd = ym + date.getUTCDate().toString().padStart(2, '0');
+    const file = '/lists/' + version + '/' + ym + '.js';
+    const resp = await fetch(file);
+    const json = <ListItem[]> await resp.json();
+    const game = json.find(x => x.date == ymd);
+    if (!game) throw 'Server error: unable to get game list';
+    await loadGame(version, game);
+}
+
+async function loadGame(version : GameVersion, game : ListItem) {
     gameState.loading = true;
     gameState.version = version;
     gameState.guesses = [];
-    gameState.id = id;
+    gameState.id = game.index;
     gameState.loading = false;
     gameState.solved = false;
     gameState.highlighted = undefined;
 
     gameState.element.innerHTML = 'Loading...';
     
-    if (!load()) gameState.article = await getArticle('Particle_physics');
+    if (!load()) gameState.article = await getArticle(atob(game.name));
     
     if (!gameState.article || !gameState.article.html) return;
 
@@ -48,13 +91,17 @@ export async function loadGame(version : GameVersion, id : number) {
     // Censoring
     el.querySelectorAll('.word').forEach(x => {
         if (!x.textContent) return;
+
         const text = x.textContent.trim().toLowerCase();
-        if (commonWords.includes(text)) return;
         (<any> x).originalContent = x.textContent;
+        (<any> x).word = text.replace("'", '').normalize('NFD');
+
+        if (commonWords.includes(text)) return;
         x.textContent = '\u2588'.repeat(text.length);
         x.classList.add('censored');
-        (<any> x).word = text.replace("'", '').normalize('NFD');
     });
+
+    window.location.hash = `#/${version}/${gameState.id}`;
 
     save();
     reveal(gameState.guesses);
@@ -94,6 +141,22 @@ function load() : boolean {
 
 export async function guess(word: string) {
     word = word.replace(/\s/g,'').normalize('NFD');
+
+    if (commonWords.includes(word)) {
+        highlight({
+            word,
+            words: [word],
+            hits: 0
+        });
+        return;
+    }
+
+    const existingGuess = gameState.guesses.find(x => x.words.includes(word));
+    if (existingGuess) {
+        highlight(existingGuess);
+        return;
+    }
+
     const words = [word];
 
     const plu = pluralize(word);
@@ -140,11 +203,11 @@ function checkForWin() {
         });
             
         gameState.solved = true;
+        gameState.element.closest('.overflow-auto')?.scrollTo({ top: 0, behavior: 'smooth' });
         highlight(undefined);
         save();
     }
 }
-
 
 let highlightIndex = 0;
 export function highlight(guess : Guess | undefined) {

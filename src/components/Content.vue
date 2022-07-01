@@ -1,9 +1,8 @@
 <script setup lang="ts">
 
 import { ref, computed, watch, onMounted, onUpdated, onUnmounted } from 'vue';
-import { commonWords } from '../common-words';
 
-import { gameState, loadGame } from '../store';
+import { gameState } from '../store';
 
 const element = ref<HTMLElement>();
 
@@ -31,7 +30,7 @@ function share() {
 <template>
     <div class="article-container overflow-auto">
         <section v-if="gameState.solved">
-                <h3>Congratulations, you solved Redactle #${redactleIndex+1}!</h3>
+                <h3>Congratulations, you solved Redactle #{{gameState.id}}!</h3>
                 <ul>
                     <li>The answer was: {{gameState.article?.title}}</li>
                     <li>You solved it in {{gameState.guesses.length}} guesses</li>
