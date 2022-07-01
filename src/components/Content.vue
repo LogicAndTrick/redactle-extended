@@ -22,7 +22,14 @@ const accuracy = computed(() => {
 });
 
 function share() {
-    // todo 
+    const shareText = "I solved today's"
+        + (gameState.version == 'standard' ? '' : gameState.version)
+        + " Redactle Extended (#" + gameState.id + ") in "
+        + gameState.guesses.length
+        + " guesses with an accuracy of " + accuracy.value
+        + ". Played at http://redactle.logic-and-trick.com/";
+    navigator.clipboard.writeText(shareText);
+    alert("Results copied to clipboard. Thanks for playing!");
 }
 
 </script>
