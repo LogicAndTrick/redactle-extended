@@ -1,12 +1,12 @@
 import pluralize from 'pluralize';
 import { reactive } from 'vue';
-import { commonWords } from './common-words';
+import { isCommonWord } from './common-words';
 import { Article, getArticle } from './net';
 
-export type GameVersion = 'standard' | 'gaming';
+export type GameVersion = 'standard' | 'gaming' | 'easy';
 
 function isValidVersion(name : string | null | undefined) : name is GameVersion {
-    return name == 'standard' || name == 'gaming';
+    return name == 'standard' || name == 'gaming' || name == 'easy';
 }
 
 export type Guess = {
@@ -50,10 +50,22 @@ export async function loadTodaysGame(version : GameVersion) {
     await loadDateGame(version, today);
 }
 
-export async function loadGameById(version : GameVersion, id : number) {
+function dateForId(id : number) : Date {
     const date = new Date(Date.parse('2022-06-25T00:00:00Z'));
-    const now = new Date();
     date.setUTCDate(date.getUTCDate() + id);
+    return date;
+}
+
+function idForDate(date : Date) : number {
+    const start = new Date(Date.parse('2022-06-25T00:00:00Z'));
+    const diff = date.getTime() - start.getTime();
+    const days = Math.floor(diff / (1000 * 3600 * 24));
+    return days;
+}
+
+export async function loadGameById(version : GameVersion, id : number) {
+    const date = dateForId(id);
+    const now = new Date();
     if (date > now) await loadDateGame(version, now);
     else await loadDateGame(version, date);
 }
@@ -96,12 +108,14 @@ async function loadGame(version : GameVersion, game : ListItem) {
         (<any> x).originalContent = x.textContent;
         (<any> x).word = text.replace("'", '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, "");
 
-        if (commonWords.includes(text)) return;
+        if (isCommonWord(version, text)) return;
         x.textContent = '\u2588'.repeat(text.length);
         x.classList.add('censored');
     });
 
-    window.location.hash = `#/${version}/${gameState.id}`;
+    if (gameState.id !== idForDate(new Date())) window.location.hash = `#/${version}/${gameState.id}`;
+    else if (version != 'standard') window.location.hash = `#/${version}`;
+    else history.pushState("", document.title, window.location.pathname + window.location.search);
 
     save();
     reveal(gameState.guesses);
@@ -142,7 +156,7 @@ function load() : boolean {
 export async function guess(word: string) {
     word = word.replace(/\s/g,'').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, "");
 
-    if (commonWords.includes(word)) {
+    if (isCommonWord(gameState.version, word)) {
         highlight({
             word,
             words: [word],

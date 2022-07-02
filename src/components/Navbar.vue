@@ -41,15 +41,16 @@ function jump(id : number) {
                         <li class="nav-item">
                             <a class="nav-link mx-2" href="#" id="infoBtn" @click.prevent="openInfoModal">Info</a>
                         </li>
-                        <!-- <li class="nav-item dropdown">
+                        <li class="nav-item dropdown">
                             <a class="nav-link mx-2 dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Edition: {{gameState.version}}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDropdown">
                                 <li><a class="dropdown-item" href="#" @click.prevent="loadTodaysGame('standard')">Standard</a></li>
-                                <li><a class="dropdown-item" href="#" @click.prevent="loadTodaysGame('gaming')">Gaming</a></li>
+                                <li><a class="dropdown-item" href="#" @click.prevent="loadTodaysGame('easy')">Easy</a></li>
+                                <!-- <li><a class="dropdown-item" href="#" @click.prevent="loadTodaysGame('gaming')">Gaming</a></li> -->
                             </ul>
-                        </li> -->
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link mx-2" href="https://www.redactle.com/" target="_blank">Original Redactle</a>
                         </li>

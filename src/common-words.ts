@@ -1,5 +1,5 @@
 
-export const commonWords = [
+const commonWords = [
     // Original redactle
     'a',
     'aboard',
@@ -97,3 +97,15 @@ export const commonWords = [
     'were',
     'which',
 ];
+
+const editionCommonWords : Record<string, string[]> = {
+    'standard': [],
+    'easy': [],
+    'gaming': []
+};
+
+export function isCommonWord(version: string, word: string) : boolean {
+    if (commonWords.includes(word)) return true;
+    if (editionCommonWords[version] && editionCommonWords[version].includes(word)) return true;
+    return false;
+}

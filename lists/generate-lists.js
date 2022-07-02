@@ -46,5 +46,6 @@ function generateList(name) {
 const listsDir = path.join('..', 'public', 'lists');
 if (!fs.existsSync(listsDir)) fs.mkdirSync(listsDir);
 
-generateList('standard');
-generateList('gaming');
+//generateList('standard');
+generateList('easy');
+//generateList('gaming');

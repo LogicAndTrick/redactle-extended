@@ -43,6 +43,7 @@ const badElements = [
     ".infobox",
     ".unsolved",
     ".navbox",
+    ".vertical-navbox",
     ".metadata",
     ".refbegin",
     ".reflist",
@@ -118,6 +119,7 @@ async function getArticleFollowRedirects(name: string, redirectCount: number) : 
     // Strip elements that mess with formatting
     el.querySelectorAll('a').forEach(x => unwrap(x));
     el.querySelectorAll('b').forEach(x => unwrap(x));
+    el.querySelectorAll('span[lang]').forEach(x => unwrap(x));
 
     el.querySelectorAll('blockquote').forEach(x => {
         x.innerHTML = x.innerHTML.replace(/<[^>]*>?/gm, '');
@@ -170,7 +172,7 @@ async function getArticleFollowRedirects(name: string, redirectCount: number) : 
         .forEach(x => {
             if (!x.textContent) return;
             const replaceNode = document.createElement('div');
-            replaceNode.innerHTML = x.textContent.replace(/\b([A-Za-zÀ-ÖØ-öø-ÿ0-9']+)\b/ig, '<span class="word">$1</span>');
+            replaceNode.innerHTML = x.textContent.replace(/(?<=^|\s)([^\s]+)(?=$|\s)/ig, '<span class="word">$1</span>');
             x.replaceWith(...Array.from(replaceNode.childNodes));
         });
 

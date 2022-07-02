@@ -23,11 +23,11 @@ const accuracy = computed(() => {
 
 function share() {
     const shareText = "I solved today's"
-        + (gameState.version == 'standard' ? '' : gameState.version)
+        + (gameState.version == 'standard' ? '' : ' ' + gameState.version)
         + " Redactle Extended (#" + gameState.id + ") in "
         + gameState.guesses.length
         + " guesses with an accuracy of " + accuracy.value
-        + ". Played at http://redactle.logic-and-trick.com/";
+        + ". Played at http://redactle.logic-and-trick.com/" + (gameState.version == 'standard' ? '' : '#/' + gameState.version);
     navigator.clipboard.writeText(shareText);
     alert("Results copied to clipboard. Thanks for playing!");
 }
@@ -37,7 +37,7 @@ function share() {
 <template>
     <div class="article-container overflow-auto">
         <section v-if="gameState.solved">
-                <h3>Congratulations, you solved Redactle Extended #{{gameState.id}}!</h3>
+                <h3>Congratulations, you solved Redactle Extended {{gameState.version == 'standard' ? '' : `(${gameState.version})`}} #{{gameState.id}}!</h3>
                 <ul>
                     <li>The answer was: {{gameState.article?.title}}</li>
                     <li>You solved it in {{gameState.guesses.length}} guesses</li>
