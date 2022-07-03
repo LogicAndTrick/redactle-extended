@@ -39,7 +39,7 @@ function share() {
         <section v-if="gameState.solved">
                 <h3>Congratulations, you solved Redactle Extended {{gameState.version == 'standard' ? '' : `(${gameState.version})`}} #{{gameState.id}}!</h3>
                 <ul>
-                    <li>The answer was: {{gameState.article?.title}}</li>
+                    <li>The answer was: {{gameState.processedArticle?.title}}</li>
                     <li>You solved it in {{gameState.guesses.length}} guesses</li>
                     <li>Your accuracy was {{accuracy}}</li>
                 </ul>

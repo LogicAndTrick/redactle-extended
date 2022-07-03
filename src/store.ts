@@ -1,7 +1,7 @@
 import pluralize from 'pluralize';
 import { reactive } from 'vue';
 import { isCommonWord } from './common-words';
-import { Article, getArticle } from './net';
+import { UnprocessedArticle, Article, getArticle, processArticle } from './net';
 
 export type GameVersion = 'standard' | 'gaming' | 'easy';
 
@@ -20,7 +20,8 @@ export const gameState = reactive({
     loading: false,
     version: <GameVersion> 'standard',
     guesses: <Guess[]> [],
-    article: <Article | undefined> undefined,
+    unprocessedArticle: <UnprocessedArticle | undefined> undefined,
+    processedArticle: <Article | undefined> undefined,
     solved: false,
     element: <HTMLElement> document.createElement('div'),
     highlighted: <Guess | undefined> undefined
@@ -92,13 +93,13 @@ async function loadGame(version : GameVersion, game : ListItem) {
 
     gameState.element.innerHTML = 'Loading...';
     
-    if (!load()) gameState.article = await getArticle(atob(game.name));
-    
-    if (!gameState.article || !gameState.article.html) return;
+    if (!load()) gameState.unprocessedArticle = await getArticle(atob(game.name));
+    if (!gameState.unprocessedArticle || !gameState.unprocessedArticle.html) return;
+    gameState.processedArticle = processArticle(gameState.unprocessedArticle);
 
     const el = gameState.element;
     el.classList.add('content');
-    el.innerHTML = gameState.article.html;
+    el.innerHTML = gameState.processedArticle.html;
     
     // Censoring
     el.querySelectorAll('.word').forEach(x => {
@@ -122,7 +123,7 @@ async function loadGame(version : GameVersion, game : ListItem) {
     checkForWin();
 }
 
-const SAVE_VERSION = 2;
+const SAVE_VERSION = 3;
 
 function save() {
     localStorage.setItem('selected-version', gameState.version);
@@ -130,7 +131,7 @@ function save() {
         v: SAVE_VERSION,
         id: gameState.id,
         guesses: gameState.guesses,
-        article: gameState.article,
+        unprocessedArticle: gameState.unprocessedArticle,
         solved: gameState.solved
     }));
 }
@@ -145,7 +146,7 @@ function load() : boolean {
         if (item.v !== SAVE_VERSION) return false;
         
         gameState.guesses = item.guesses;
-        gameState.article = <Article> item.article;
+        gameState.unprocessedArticle = <UnprocessedArticle> item.unprocessedArticle;
         if (item.solved === true) gameState.solved = true;
         return true;
     } catch {

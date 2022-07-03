@@ -1,4 +1,8 @@
 
+export type UnprocessedArticle = {
+    title: string,
+    html: string;
+};
 export type Article = {
     title: string,
     html: string;
@@ -44,7 +48,7 @@ const badElements = [
     ".unsolved",
     ".navbox",
     ".vertical-navbox",
-    ".metadata",
+    //".metadata",
     ".refbegin",
     ".reflist",
     ".mw-stack",
@@ -65,7 +69,10 @@ const badElements = [
     ".cs1-ws-icon",
     "sup",
     "excerpt",
-    "style"
+    "style",
+    "img",
+    "audio",
+    "video"
 ];
 
 const specialPunctuation = [
@@ -73,22 +80,15 @@ const specialPunctuation = [
     'i.e.'
 ];
 
-async function getArticleFollowRedirects(name: string, redirectCount: number) : Promise<Article> {
+async function getArticleFollowRedirects(name: string, redirectCount: number) : Promise<UnprocessedArticle> {
     const resp = await fetch('https://en.wikipedia.org/w/api.php?action=parse&format=json&page=' + name + '&prop=text&formatversion=2&origin=*')
     if (!resp.ok) {
         throw `Server error: [${resp.status}] [${resp.statusText}] [${resp.url}]`;
     }
     const receivedJson = await resp.json();
-    let cleanText = receivedJson.parse.text
-        .replace(/<img[^>]*>/g,"")
-        .replace(/\<small\>/g,'')
-        .replace(/\<\/small\>/g,'')
-        .replace(/â€“/g,'-')
-        .replace(/<audio.*?<\/audio>/g,"")
-        .replace(/<video.*?<\/video>/g,"");
 
     const el = document.createElement('div');
-    el.innerHTML = cleanText;
+    el.innerHTML = receivedJson.parse.text;
 
     // Check for redirects
     const redirecting = el.getElementsByClassName('redirectMsg');
@@ -96,13 +96,24 @@ async function getArticleFollowRedirects(name: string, redirectCount: number) : 
         const redirURL = el.querySelector('.redirectText li a')!.innerHTML.replace(' ', '_');
         return await getArticleFollowRedirects(redirURL, redirectCount + 1);
     }
+    return {
+        title: receivedJson.parse.title,
+        html: el.innerHTML
+    };
+}
 
+export function processArticle(article : UnprocessedArticle) : Article {
+    const el = document.createElement('div');
+
+    let cleanHtml = article.html.replace(/â€“/g,'-');
+
+    el.innerHTML = cleanHtml;
     const e = el.querySelector('.mw-parser-output')!;
 
     // Find the 'see also' section at the end of the page and remove everything after it
-    const seeAlso = el.querySelector("#See_also")?.parentNode
-        ?? el.querySelector("#Notes")?.parentNode
-        ?? el.querySelector("#References")?.parentNode;
+    const seeAlso = e.querySelector("#See_also")?.parentNode
+        ?? e.querySelector("#Notes")?.parentNode
+        ?? e.querySelector("#References")?.parentNode;
 
     if (seeAlso) {
         const alsoIndex = Array.prototype.indexOf.call(e.childNodes, seeAlso);
@@ -119,6 +130,7 @@ async function getArticleFollowRedirects(name: string, redirectCount: number) : 
     // Strip elements that mess with formatting
     el.querySelectorAll('a').forEach(x => unwrap(x));
     el.querySelectorAll('b').forEach(x => unwrap(x));
+    el.querySelectorAll('small').forEach(x => unwrap(x));
     el.querySelectorAll('span[lang]').forEach(x => unwrap(x));
 
     el.querySelectorAll('blockquote').forEach(x => {
@@ -132,7 +144,7 @@ async function getArticleFollowRedirects(name: string, redirectCount: number) : 
 
     // Add article title
     const titleHolder = document.createElement('h1');
-    const titleTxt = receivedJson.parse.title.replace('_', ' ');
+    const titleTxt = article.title.replace('_', ' ');
     titleHolder.innerText = titleTxt;
     e.prepend(titleHolder);
 
@@ -183,27 +195,4 @@ async function getArticleFollowRedirects(name: string, redirectCount: number) : 
         title: titleTxt,
         html: el.innerHTML
     };
-}
-
-export function censor(html : string) {
-
-    //const ansStr = titleTxt.replace(/ *\([^)]*\) */g, "").normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    //let ans = ansStr.match(/\b(\w+)\b/g);
-    //ans = ans.filter( function( el ) {
-    //    return commonWords.indexOf( el ) < 0;
-    //    } );
-    //
-
-    
-    //wikiHolder.innerHTML = wikiHolder.innerHTML.replace(/<!--(?!>)[\S\s]*?-->/g, '');
-    //$(".mw-parser-output span").not(".punctuation").each(function() {
-    //    var txt = this.innerHTML.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    //    if(!commonWords.includes(txt)){
-    //        this.classList.toggle('baffled');
-    //        let b = baffle(this).once().set({
-    //            characters: 'abcd'
-    //        });
-    //        baffled.push([txt, b]);
-    //    }
-    //});
 }
